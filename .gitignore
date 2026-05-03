@@ -1,0 +1,22 @@
+# Models (Heavy)
+**/tracemind_bert_model/
+*.safetensors
+*.bin
+*.h5
+
+# Data (Heavy)
+*.csv
+*.pkl
+
+# Dependencies & Environments
+node_modules/
+venv/
+env/
+__pycache__/
+
+# Frontend Builds
+frontend/build/
+frontend/dist/
+
+# Env secrets
+.env
