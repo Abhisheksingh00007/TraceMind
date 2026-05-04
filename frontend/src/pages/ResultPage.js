@@ -204,8 +204,8 @@ export const ResultPage = ({ result, setPage }) => {
                   <Phone size={24} className="text-rose-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-rose-500 uppercase tracking-widest">Get Help Now</h3>
-                  <p className="text-slate-400 text-sm font-medium">You’re Not Alone Help is available right now. You can talk to someone who understands.</p>
+                  <h3 className="text-lg font-black text-rose-500 uppercase tracking-widest">You’re Not Alone</h3>
+                  <p className="text-slate-400 text-sm font-medium">Help is available right now. You can talk to someone who understands.</p>
                 </div>
               </div>
               <button 
