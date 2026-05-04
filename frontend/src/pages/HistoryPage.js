@@ -29,10 +29,17 @@ export const HistoryPage = () => {
         toast.error("Failed to load records.");
       }
     } catch (err) {
-      toast.error("Error fetching history from server.");
+      toast.error("Error fetching record from server.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDateTime = (timestamp) => {
+    const d = new Date(timestamp);
+    const datePart = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return `${datePart} • ${timePart}`;
   };
 
   const downloadPDF = () => {
@@ -95,15 +102,15 @@ export const HistoryPage = () => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-4xl mx-auto space-y-8 pb-12 pt-4 px-2">
       <div className="flex flex-col md:flex-row justify-between md:items-end border-b border-slate-800/80 pb-6 gap-6">
         <div className="text-center md:text-left">
-          <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase">Neural History</h2>
-          <p className="text-slate-200 text-sm font-medium mt-1">Encrypted assessment logs across the timeline.</p>
+          <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter">Past Records</h2>
+          <p className="text-slate-200 text-sm font-medium mt-1">Your previous assessments, securely stored in one place.</p>
         </div>
         <button 
           onClick={downloadPDF}
           disabled={history.length === 0}
           className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg active:scale-95"
         >
-          <Download size={18} /> Download History
+          <Download size={18} /> Download Records
         </button>
       </div>
 
@@ -133,7 +140,7 @@ export const HistoryPage = () => {
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-5 border-b border-slate-800/50 pb-5">
                   <div className="flex items-center text-slate-400 text-xs font-bold uppercase tracking-widest">
                     <Calendar size={14} className="mr-3 text-cyan-500" />
-                    {new Date(record.timestamp).toLocaleString('en-GB')}
+                    {formatDateTime(record.timestamp)}
                   </div>
                   <div className={`px-4 py-1.5 rounded-full border flex items-center text-[10px] font-black uppercase tracking-[0.15em] ${styles.bg} ${styles.color} ${styles.border}`}>
                     {styles.icon} {record.detected_risk_level} RISK
