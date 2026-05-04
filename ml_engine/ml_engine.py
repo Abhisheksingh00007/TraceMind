@@ -2,16 +2,16 @@ import re
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-print("🚀 Initializing TraceMind Neural Core (BERT) from Hugging Face...")
+print("Initializing TraceMind Neural Core (BERT) from Hugging Face...")
 
 try:
     model_path = "Abhisheksingh007/tracemind-bert-hinglish"
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     model = AutoModelForSequenceClassification.from_pretrained(model_path)
     bert_ready = True
-    print("✅ BERT Model Synced from Cloud Successfully!")
+    print("BERT Model Synced from Cloud Successfully!")
 except Exception as e:
-    print(f"❌ Error loading BERT model: {e}")
+    print(f"Error loading BERT model: {e}")
     bert_ready = False
     tokenizer = None
     model = None
