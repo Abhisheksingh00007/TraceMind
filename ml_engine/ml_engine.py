@@ -2,16 +2,16 @@ import re
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-print("🚀 Initializing TraceMind Neural Core (BERT) from Hugging Face...")
+print(" Initializing TraceMind Neural Core (BERT) from Hugging Face...")
 
-try:
-    model_path = "Abhisheksingh007/tracemind-bert-hinglish"
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    model = AutoModelForSequenceClassification.from_pretrained(model_path)
-    bert_ready = True
-    print("✅ BERT Model Synced from Cloud Successfully!")
+ try:
+     model_path = "Abhisheksingh007/tracemind-bert-hinglish"
+     tokenizer = AutoTokenizer.from_pretrained(model_path)
+     model = AutoModelForSequenceClassification.from_pretrained(model_path)
+     bert_ready = True
+     print(" BERT Model Synced from Cloud Successfully!")
 except Exception as e:
-    print(f"❌ Error loading BERT model: {e}")
+    print(f" Error loading BERT model: {e}")
     bert_ready = False
     tokenizer = None
     model = None
@@ -37,7 +37,16 @@ def process_hinglish(text):
         "akela": "lonely isolated", 
         "tension": "anxiety stress",
         "mann nahi lagta": "loss of interest anhedonia", 
-        "himmat nahi": "hopelessness"
+        "himmat nahi": "hopelessness",
+        "thak": "tired exhausted",
+        "udas": "sad depressed",
+        "boring": "bored unmotivated",
+        "excited": "happy enthusiastic positive",
+        "ghumne": "traveling outing happy",
+        "acha": "good positive",
+        "maza": "fun enjoyment positive",
+        "thik": "okay normal positive",
+        "manage": "handled okay positive"
     }
     
     for slang, formal in mapping.items():
@@ -67,4 +76,7 @@ def analyze_with_bert(text):
     
     prediction = "suicide" if predicted_class_id == 1 else "normal"
     
+    if prediction == "suicide" and confidence < 0.85:
+        prediction = "depression"
+        
     return prediction, confidence

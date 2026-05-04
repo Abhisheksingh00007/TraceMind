@@ -13,10 +13,10 @@ def get_database():
         client = MongoClient(MONGO_URI)
         db = client[DB_NAME]
         client.admin.command('ping')
-        print("☁️ Database: Connected to MongoDB Atlas successfully!")
+        print(" Database: Connected to MongoDB Atlas successfully!")
         return db
     except Exception as e:
-        print(f"❌ Database Error: {e}")
+        print(f" Database Error: {e}")
         return None
 
 db = get_database()

@@ -200,21 +200,52 @@ async def analyze(data: PatientData, request: Request):
         "mar jau", "jaan de", "khud ko mar", "kisi ko mar", "jaan se maar"
     ]
     
+    moderate_flags = [
+        "tension", "akela", "load", "pareshan", "thak", "tired", "lonely", 
+        "stress", "stressed", "udas", "sad", "neend nahi", "boring", "himmat"
+    ]
+    
+    positive_flags = [
+        "acha", "good", "happy", "excited", "maza", "great", "mast", 
+        "badhiya", "thik", "manage"
+    ]
+    
     words = raw_input.replace(".", " ").replace(",", " ").split()
     has_kuch = any(w in words for w in ["kuch", "kuchh", "kch", "kuchha"])
     has_kar = any(w in words for w in ["kar", "kr", "krlu"])
     has_intent = any(w in words for w in ["lunga", "luga", "lene", "leni", "lu"])
-    has_end = "khatam" in raw_input or "end" in raw_input
     
-    trigger_found = any(flag in raw_input for flag in red_flags) or (has_kuch and has_kar and has_intent) or has_end
+    has_life_end = any(phrase in raw_input for phrase in ["zindagi khatam", "life khatam", "sab khatam", "zindagi khtm", "life end"])
+    
+    trigger_found = any(flag in raw_input for flag in red_flags) or (has_kuch and has_kar and has_intent) or has_life_end
+    moderate_trigger_found = any(flag in raw_input for flag in moderate_flags)
+    positive_trigger_found = any(flag in raw_input for flag in positive_flags)
     
     processed_text = process_hinglish(raw_input)
     
     prediction, confidence = analyze_with_bert(processed_text)
             
-    is_valid_input = trigger_found or (word_count >= 3 and confidence >= 0.75)
-    effective_prediction = prediction if is_valid_input else None
+    is_valid_input = trigger_found or moderate_trigger_found or positive_trigger_found or (word_count >= 3)
     
+    if prediction == "suicide" and moderate_trigger_found and not trigger_found:
+        effective_prediction = "depression"
+    else:
+        effective_prediction = prediction if is_valid_input else None
+    is_emergency = trigger_found or (effective_prediction == "suicide" and not positive_trigger_found)
+
+    # SMART CLASSIFICATION: ANXIETY vs DEPRESSION
+    has_anxiety_words = any(w in raw_input for w in ["tension", "pareshan", "load", "stress", "stressed", "anxious", "ghabrahat"])
+    has_depression_words = any(w in raw_input for w in ["akela", "udas", "sad", "lonely", "boring", "himmat", "hopeless", "rona"])
+    
+    primary_issue = "Stress" # Default
+    
+    if (data.phq9_score >= 10 and data.gad7_score >= 10) or (has_anxiety_words and has_depression_words):
+        primary_issue = "Anxiety & Depression"
+    elif data.gad7_score > data.phq9_score or has_anxiety_words:
+        primary_issue = "Anxiety"
+    elif data.phq9_score > data.gad7_score or has_depression_words:
+        primary_issue = "Depression"
+
     try:
         bmi = round(data.weight / ((data.height / 100) ** 2), 1)
     except: 
@@ -225,23 +256,25 @@ async def analyze(data: PatientData, request: Request):
     if not is_valid_input:
         nlp_status = "Insufficient Data for Sentiment Analysis"
     else:
-        nlp_status = "Feeling Okay / Normal"
+        nlp_status = "Feeling Good"
 
-    if trigger_found or effective_prediction == "suicide" or data.phq9_score >= 15:
+    # BASE RISK LOGIC 
+    if is_emergency or data.phq9_score >= 15:
         risk_level = "HIGH"
         if "kisi ko" in raw_input or "jaan se maar" in raw_input:
             nlp_status = "Anger or Threat Detected"
         else:
-            nlp_status = "Feeling Very Low / High Stress"
+            nlp_status = f"Going Through High {primary_issue}"
             
-    elif data.phq9_score >= 10 or data.gad7_score >= 10 or effective_prediction in ["depression", "anxiety"]:
+    elif moderate_trigger_found or data.phq9_score >= 10 or data.gad7_score >= 10 or (effective_prediction in ["depression", "anxiety"] and not positive_trigger_found):
         risk_level = "MODERATE"
-        nlp_status = "Feeling Anxious or Stressed"
+        nlp_status = f"Going Through Some {primary_issue}"
         
     elif data.phq9_score >= 5 or data.gad7_score >= 5 or data.sleep_hours <= 5:
         risk_level = "MODERATE"
         nlp_status = "A Bit Tired or Overwhelmed"
 
+    # Default Suggestions
     if risk_level == "HIGH":
         if "Anger" in nlp_status:
             suggestions = [
@@ -268,6 +301,7 @@ async def analyze(data: PatientData, request: Request):
             "Make sure you get enough sleep every night."
         ]
     
+    # EMOTION & TEXT HISTORY ANALYSIS 
     past_session_count = 0
     if history_collection is not None:
         past_records = list(history_collection.find({"user_email": user_email}).sort("timestamp", 1))
@@ -276,39 +310,53 @@ async def analyze(data: PatientData, request: Request):
         if past_session_count > 0:
             past_phq9_scores = [rec.get("phq9_score", 0) for rec in past_records]
             past_gad7_scores = [rec.get("gad7_score", 0) for rec in past_records]
+            past_risk_levels = [rec.get("detected_risk_level", "LOW") for rec in past_records]
             
             avg_past_phq9 = sum(past_phq9_scores) / past_session_count
             avg_past_gad7 = sum(past_gad7_scores) / past_session_count
             
-            if avg_past_phq9 >= 12 and data.phq9_score >= 15:
-                risk_level = "HIGH"
-                nlp_status = "Long-Term Stress Detected"
-                suggestions = [
-                    "You have been feeling low for a while. You deserve extra care.",
-                    "Please book an appointment with a doctor or therapist soon.",
-                    "Don't give up. Professional help can make you feel much better."
-                ]
-                
-            elif data.phq9_score > (avg_past_phq9 + 6) or data.gad7_score > (avg_past_gad7 + 6):
-                if risk_level == "LOW": 
-                    risk_level = "MODERATE"
-                elif risk_level == "MODERATE" and data.phq9_score >= 10:
+            past_negative_text_count = past_risk_levels.count("HIGH") + past_risk_levels.count("MODERATE")
+            
+        
+            if not is_emergency:
+                if risk_level == "MODERATE" and past_negative_text_count >= 2:
                     risk_level = "HIGH"
+                    nlp_status = f"Dealing with Ongoing {primary_issue}"
+                    suggestions = [
+                        "You have been expressing sadness and stress in your recent assessments too.",
+                        "It is highly recommended to not ignore this. Please speak to a counselor.",
+                        "Talk to someone close to you about how you've been feeling lately."
+                    ]
+
+                elif avg_past_phq9 >= 12 and data.phq9_score >= 15:
+                    risk_level = "HIGH"
+                    nlp_status = f"Dealing with High {primary_issue}"
+                    suggestions = [
+                        "You have been feeling low for a while. You deserve extra care.",
+                        "Please book an appointment with a doctor or therapist soon.",
+                        "Don't give up. Professional help can make you feel much better."
+                    ]
                     
-                nlp_status = "Sudden Increase in Stress"
-                suggestions = [
-                    "Your stress levels have gone up suddenly today.",
-                    "Try to find out what triggered this feeling.",
-                    "Take a break from work or screens and try to relax your mind."
-                ]
-                
-            elif avg_past_phq9 >= 10 and data.phq9_score <= 5 and data.gad7_score <= 5:
-                nlp_status = "Feeling Much Better"
-                suggestions = [
-                    "Great job! You are feeling much better than your past assessments.",
-                    "Whatever good habits you are following right now, keep doing them!",
-                    "Enjoy your day and keep your mind relaxed."
-                ]
+                elif data.phq9_score > (avg_past_phq9 + 6) or data.gad7_score > (avg_past_gad7 + 6):
+                    if risk_level == "LOW": 
+                        risk_level = "MODERATE"
+                    elif risk_level == "MODERATE" and data.phq9_score >= 10:
+                        risk_level = "HIGH"
+                        
+                    nlp_status = "Sudden Increase in Stress"
+                    suggestions = [
+                        "Your stress levels have gone up suddenly today.",
+                        "Try to find out what triggered this feeling.",
+                        "Take a break from work or screens and try to relax your mind."
+                    ]
+                    
+                elif avg_past_phq9 >= 10 and data.phq9_score <= 5 and data.gad7_score <= 5 and risk_level == "LOW":
+                    nlp_status = "Feeling Much Better"
+                    suggestions = [
+                        "Great job! You are feeling much better than your past assessments.",
+                        "Whatever good habits you are following right now, keep doing them!",
+                        "Enjoy your day and keep your mind relaxed."
+                    ]
 
     if history_collection is not None:
         try:
@@ -336,7 +384,8 @@ async def analyze(data: PatientData, request: Request):
         "bmi": str(bmi),
         "symptoms_analyzed": len(data.symptoms) + 4,
         "nlp_detection": nlp_status,
-        "suggestions": suggestions
+        "suggestions": suggestions,
+        "original_text": data.narrative
     }
 
 @app.get("/history")

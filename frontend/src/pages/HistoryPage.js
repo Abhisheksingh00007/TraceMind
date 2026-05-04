@@ -103,7 +103,7 @@ export const HistoryPage = () => {
           disabled={history.length === 0}
           className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg active:scale-95"
         >
-          <Download size={18} /> Export Vault
+          <Download size={18} /> Download History
         </button>
       </div>
 

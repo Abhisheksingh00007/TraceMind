@@ -251,7 +251,10 @@ function App() {
       });
 
       setTimeout(() => { 
-        setResult(response.data); 
+        setResult({
+          ...response.data,
+          original_text: formData.narrative 
+        }); 
         setPage('result'); 
         setLoading(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });

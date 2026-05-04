@@ -3,10 +3,10 @@ import re
 import os
 
 def clean_pipeline():
-    print("🚀 Initializing Data Cleaning Pipeline...")
+    print(" Initializing Data Cleaning Pipeline...")
     input_file = 'raw_data/raw_mental_health_data.csv' 
     if not os.path.exists(input_file):
-        print(f"❌ Error: {input_file} nahi mili!")
+        print(f" Error: {input_file} nahi mili!")
         return
 
     df = pd.read_csv(input_file, low_memory=False)
@@ -44,9 +44,9 @@ def clean_pipeline():
     df[['clean_text', 'label']].to_csv(output_file, index=False)
 
     final_count = len(df)
-    print(f"✨ Cleaning Complete!")
-    print(f"📉 Rows removed: {initial_count - final_count}")
-    print(f"✅ Final Dataset: {final_count} rows saved as '{output_file}'")
+    print(f" Cleaning Complete!")
+    print(f" Rows removed: {initial_count - final_count}")
+    print(f" Final Dataset: {final_count} rows saved as '{output_file}'")
 
 if __name__ == "__main__":
     clean_pipeline()

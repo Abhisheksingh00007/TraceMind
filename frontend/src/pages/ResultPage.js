@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Download, AlertTriangle, ShieldCheck, FileText, Brain, HeartPulse, CheckCircle2, RefreshCcw, Loader2, Phone, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Activity, Download, AlertTriangle, ShieldCheck, HeartPulse, CheckCircle2, RefreshCcw, Loader2, Phone, ChevronDown, ChevronUp, Brain } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -59,9 +59,37 @@ export const ResultPage = ({ result, setPage }) => {
     };
   };
 
+  const getPsychologicalInsight = (riskLevel) => {
+    const level = riskLevel ? riskLevel.toUpperCase() : "LOW";
+    if (level.includes("LOW")) {
+      return "Stable Emotional State";
+    } 
+    else if (level.includes("MODERATE")) {
+      return "Elevated Stress / Mild Distress";
+    } 
+    else {
+      return "Severe Emotional Distress";
+    }
+  };
+
+  const extractFactors = (text) => {
+    if (!text) return ["General Assessment"];
+    const inputText = String(text).toLowerCase();
+    let detectedFactors = [];
+
+    if (inputText.match(/neend|sleep|sone/)) detectedFactors.push("Sleep Issue");
+    if (inputText.match(/tension|stress|load|pareshan/)) detectedFactors.push("Stress");
+    if (inputText.match(/akela|lonely|boring/)) detectedFactors.push("Loneliness");
+    if (inputText.match(/marne|suicide|khatam|jaan/)) detectedFactors.push("Severe Distress");
+    if (inputText.match(/thak|tired|himmat/)) detectedFactors.push("Fatigue");
+
+    if (detectedFactors.length === 0) detectedFactors.push("Mood Fluctuation");
+    return detectedFactors;
+  };
+
   const theme = getTheme();
-  const isInsufficient = result.nlp_detection?.toLowerCase().includes("insufficient");
-  const cleanNlpStatus = result.nlp_detection ? result.nlp_detection.split('(')[0].trim() : 'Analyzed';
+  const insightMessage = result.nlp_detection || getPsychologicalInsight(result.risk_level);
+  const activeFactors = extractFactors(result.original_text || result.nlp_detection || "");
 
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4 flex flex-col items-center">
@@ -115,18 +143,27 @@ export const ResultPage = ({ result, setPage }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 relative z-10">
           <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl backdrop-blur-md shadow-inner">
             <p className="flex items-center text-slate-200 text-[10px] font-black uppercase tracking-widest mb-3">
-              {isInsufficient ? <Info size={14} className="mr-2 text-slate-400" /> : <FileText size={14} className="mr-2 text-cyan-500" />} AI Sentiment
+              <Brain size={14} className="mr-2 text-cyan-500" /> Psychological Insight
             </p>
-            <p className={`${isInsufficient ? 'text-sm text-slate-400' : 'text-lg text-white'} font-bold leading-tight uppercase`}>
-              {cleanNlpStatus}
+            <p className="text-lg text-white font-bold leading-tight">
+              {insightMessage}
             </p>
           </div>
           
           <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl backdrop-blur-md shadow-inner">
             <p className="flex items-center text-slate-200 text-[10px] font-black uppercase tracking-widest mb-3">
-              <Activity size={14} className="mr-2 text-purple-500" /> Indicators
+              <Activity size={14} className="mr-2 text-purple-500" /> Indicators ({activeFactors.length} Factors)
             </p>
-            <p className="text-2xl font-black text-white">{result.symptoms_analyzed} <span className="text-xs font-bold text-slate-200 uppercase tracking-widest ml-1">Factors</span></p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {activeFactors.map((factor, index) => (
+                <span 
+                  key={index} 
+                  className="bg-[#2d3748] text-teal-400 text-xs px-3 py-1 rounded-full font-medium border border-gray-600"
+                >
+                  {factor}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl backdrop-blur-md shadow-inner">
@@ -159,69 +196,71 @@ export const ResultPage = ({ result, setPage }) => {
           </div>
         </div>
 
-        <div data-html2canvas-ignore="true" className="mt-6 bg-rose-950/20 border border-rose-900/50 rounded-3xl p-6 md:p-8 shadow-sm relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-rose-500/20 rounded-full">
-                <Phone size={24} className="text-rose-500" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-rose-500 uppercase tracking-widest">Crisis Support</h3>
-                <p className="text-slate-400 text-sm font-medium">Immediate help is available 24/7. You are not alone.</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setShowSOS(!showSOS)}
-              className="px-5 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              {showSOS ? "Hide Helplines" : "Show Helplines"}
-              {showSOS ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {showSOS && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0, marginTop: 0 }} 
-                animate={{ height: 'auto', opacity: 1, marginTop: 24 }} 
-                exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-5 bg-[#0b1121] border border-slate-800 rounded-2xl flex flex-col justify-between transition-all hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]">
-                    <div>
-                      <h4 className="font-bold text-white">KIRAN (Govt.)</h4>
-                      <p className="text-xs text-slate-200 mt-1 font-medium">National Mental Health Helpline</p>
-                    </div>
-                    <a href="tel:18005990019" className="mt-5 py-2.5 w-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-center font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                      <Phone size={14} /> 1800-599-0019
-                    </a>
-                  </div>
-
-                  <div className="p-5 bg-[#0b1121] border border-slate-800 rounded-2xl flex flex-col justify-between transition-all hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                    <div>
-                      <h4 className="font-bold text-white">AASRA</h4>
-                      <p className="text-xs text-slate-200 mt-1 font-medium">Crisis Intervention Center</p>
-                    </div>
-                    <a href="tel:9820466726" className="mt-5 py-2.5 w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl text-center font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                      <Phone size={14} /> 9820466726
-                    </a>
-                  </div>
-
-                  <div className="p-5 bg-[#0b1121] border border-slate-800 rounded-2xl flex flex-col justify-between transition-all hover:border-amber-500/30 hover:shadow-[0_0_15px_rgba(245,158,11,0.1)]">
-                    <div>
-                      <h4 className="font-bold text-white">Vandrevala</h4>
-                      <p className="text-xs text-slate-200 mt-1 font-medium">Free Psychological Counseling</p>
-                    </div>
-                    <a href="tel:9999666555" className="mt-5 py-2.5 w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-xl text-center font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                      <Phone size={14} /> 9999666555
-                    </a>
-                  </div>
+        {(!result.risk_level?.toUpperCase().includes('LOW')) && (
+          <div data-html2canvas-ignore="true" className="mt-6 bg-rose-950/20 border border-rose-900/50 rounded-3xl p-6 md:p-8 shadow-sm relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-rose-500/20 rounded-full">
+                  <Phone size={24} className="text-rose-500" />
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                <div>
+                  <h3 className="text-lg font-black text-rose-500 uppercase tracking-widest">Crisis Support</h3>
+                  <p className="text-slate-400 text-sm font-medium">Immediate help is available 24/7. You are not alone.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowSOS(!showSOS)}
+                className="px-5 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
+              >
+                {showSOS ? "Hide Helplines" : "Show Helplines"}
+                {showSOS ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {showSOS && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0, marginTop: 0 }} 
+                  animate={{ height: 'auto', opacity: 1, marginTop: 24 }} 
+                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-5 bg-[#0b1121] border border-slate-800 rounded-2xl flex flex-col justify-between transition-all hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                      <div>
+                        <h4 className="font-bold text-white">KIRAN (Govt.)</h4>
+                        <p className="text-xs text-slate-200 mt-1 font-medium">National Mental Health Helpline</p>
+                      </div>
+                      <a href="tel:18005990019" className="mt-5 py-2.5 w-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-center font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        <Phone size={14} /> 1800-599-0019
+                      </a>
+                    </div>
+
+                    <div className="p-5 bg-[#0b1121] border border-slate-800 rounded-2xl flex flex-col justify-between transition-all hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                      <div>
+                        <h4 className="font-bold text-white">AASRA</h4>
+                        <p className="text-xs text-slate-200 mt-1 font-medium">Crisis Intervention Center</p>
+                      </div>
+                      <a href="tel:9820466726" className="mt-5 py-2.5 w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl text-center font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        <Phone size={14} /> 9820466726
+                      </a>
+                    </div>
+
+                    <div className="p-5 bg-[#0b1121] border border-slate-800 rounded-2xl flex flex-col justify-between transition-all hover:border-amber-500/30 hover:shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                      <div>
+                        <h4 className="font-bold text-white">Vandrevala</h4>
+                        <p className="text-xs text-slate-200 mt-1 font-medium">Free Psychological Counseling</p>
+                      </div>
+                      <a href="tel:9999666555" className="mt-5 py-2.5 w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-xl text-center font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        <Phone size={14} /> 9999666555
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         <div className="mt-16 pt-6 border-t border-slate-800/80 text-center opacity-40">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">
