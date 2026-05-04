@@ -68,7 +68,7 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, setPage, resetForm, p
               }`}
             >
               <BarChart2 size={20} />
-              <span className="font-bold tracking-wide">Neural Trends</span>
+              <span className="font-bold tracking-wide">Health Trends</span>
             </div>
             
             <div 
