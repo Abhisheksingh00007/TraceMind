@@ -49,8 +49,8 @@ export const AnalyticsPage = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-5xl mx-auto space-y-8 pb-12 pt-4 px-2">
       <div className="border-b border-slate-800/80 pb-6 text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase">Neural Analytics</h2>
-        <p className="text-slate-200 text-sm font-medium mt-1">Visualizing stability and progress via encrypted telemetry.</p>
+        <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase">Your Mental Health Trends</h2>
+        <p className="text-slate-200 text-sm font-medium mt-1">See how your mental health changes over time — with complete privacy and security.</p>
       </div>
 
       {data.length < 2 ? (
@@ -66,7 +66,7 @@ export const AnalyticsPage = () => {
           <div className="bg-slate-900/40 border border-slate-800/80 p-6 md:p-10 rounded-[2.5rem] shadow-sm backdrop-blur-md">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
               <h3 className="text-xs font-black text-cyan-400 uppercase tracking-[0.2em] flex items-center">
-                <TrendingUp className="mr-3" size={18} /> Mental Stability Matrix
+                <TrendingUp className="mr-3" size={18} /> Mental Health Trends
               </h3>
               <div className="flex space-x-6 text-[10px] font-black uppercase tracking-[0.15em]">
                 <span className="flex items-center text-cyan-500">
@@ -149,7 +149,7 @@ export const AnalyticsPage = () => {
                 <Brain size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Timeline PHQ-9 Average</p>
+                <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Depression Score (Average)</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-black text-white tracking-tighter">{avgPhq9}</p>
                   <span className="text-[10px] font-bold text-slate-600 uppercase">Score</span>
@@ -162,7 +162,7 @@ export const AnalyticsPage = () => {
                 <Activity size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Timeline GAD-7 Average</p>
+                <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Anxiety Score (Average)</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-black text-white tracking-tighter">{avgGad7}</p>
                   <span className="text-[10px] font-bold text-slate-600 uppercase">Score</span>
@@ -174,7 +174,7 @@ export const AnalyticsPage = () => {
           <div className="bg-slate-900/20 border border-slate-800/40 p-5 rounded-2xl flex items-center gap-4">
              <Info size={16} className="text-slate-200 shrink-0" />
              <p className="text-[10px] text-slate-200 font-medium leading-relaxed">
-               Lower scores generally indicate higher emotional stability. These metrics are calculated based on your self-reported assessments and encrypted neural telemetry.
+               Lower scores usually mean better emotional stability. These results are based on your inputs and analyzed securely.
              </p>
           </div>
         </div>
