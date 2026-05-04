@@ -57,13 +57,13 @@ export const SettingsPage = ({ userName, userEmail }) => {
       });
 
       if (response.data.status === 'success') {
-        toast.success('Preferences successfully synced to Cloud!', {
+        toast.success('Your details have been updated successfully.', {
           style: { borderRadius: '100px', background: '#022c22', color: '#34d399', border: '1px solid #064e3b' }
         });
       }
     } catch (err) {
       console.error("Cloud Sync Error", err);
-      toast.error('Local save complete, but Cloud sync failed.');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -100,8 +100,8 @@ export const SettingsPage = ({ userName, userEmail }) => {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto space-y-8 pb-12 pt-4 px-2">
         
         <div className="border-b border-slate-800/80 pb-6 text-center md:text-left">
-          <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase">System Preferences</h2>
-          <p className="text-slate-400 text-sm font-medium mt-2">Manage your neural core settings and bio-sync defaults.</p>
+          <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter">Account Settings</h2>
+          <p className="text-slate-400 text-sm font-medium mt-2">Update your details and preferences.</p>
         </div>
 
         <div className="space-y-6">
@@ -120,12 +120,12 @@ export const SettingsPage = ({ userName, userEmail }) => {
             
             <div className="flex flex-row gap-4 w-full md:w-auto justify-center md:justify-end border-t border-slate-800/80 md:border-t-0 pt-4 md:pt-0">
               <div className="flex flex-col items-center bg-slate-950/50 px-5 py-3 rounded-2xl border border-slate-800/50 min-w-[120px]">
-                <span className="flex items-center text-slate-400 font-medium text-xs mb-2"><Shield size={14} className="mr-2 text-emerald-500" /> Status</span>
-                <span className="text-emerald-400 font-black uppercase tracking-widest text-[10px] bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-md">Verified</span>
+                <span className="flex items-center text-slate-400 font-medium text-xs mb-2"><Shield size={14} className="mr-2 text-emerald-500" /> Account Status</span>
+                <span className="text-emerald-400 font-black tracking-widest text-[10px] bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-md">Verified</span>
               </div>
               <div className="flex flex-col items-center bg-slate-950/50 px-5 py-3 rounded-2xl border border-slate-800/50 min-w-[120px]">
-                <span className="flex items-center text-slate-400 font-medium text-xs mb-2"><Database size={14} className="mr-2 text-cyan-500" /> Cloud</span>
-                <span className="text-cyan-400 font-black uppercase tracking-widest text-[10px] bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-md">Active</span>
+                <span className="flex items-center text-slate-400 font-medium text-xs mb-2"><Database size={14} className="mr-2 text-cyan-500" /> Data Sync</span>
+                <span className="text-cyan-400 font-black tracking-widest text-[10px] bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-md">Active</span>
               </div>
             </div>
 
@@ -133,15 +133,15 @@ export const SettingsPage = ({ userName, userEmail }) => {
 
           <div className="bg-slate-900/60 border border-slate-800/80 p-8 md:p-10 rounded-[2.5rem] shadow-xl backdrop-blur-sm">
             <div className="mb-8 border-b border-slate-800/80 pb-6">
-              <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center">
-                <Activity className="mr-3 text-cyan-500" size={20}/> Default Physical Profile
+              <h3 className="text-lg font-bold text-white flex items-center tracking-wide">
+                <Activity className="mr-3 text-cyan-500" size={20}/> Personal Information
               </h3>
-              <p className="text-sm text-slate-200 mt-2 font-medium">Save your default metrics so you don't have to enter them every time you start a new assessment.</p>
+              <p className="text-sm text-slate-200 mt-2 font-medium">Save your details to avoid entering them every time.</p>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8">
               <div>
-                <label className="text-[10px] font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">Date of Birth</label>
+                <label className="text-xs font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">DATE OF BIRTH</label>
                 <input 
                   type={preferences.dob ? "date" : "text"} 
                   name="dob" 
@@ -154,7 +154,7 @@ export const SettingsPage = ({ userName, userEmail }) => {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">Gender</label>
+                <label className="text-xs font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">GENDER</label>
                 <select name="gender" value={preferences.gender} onChange={handleChange} className="w-full bg-slate-950/80 border border-slate-800 text-white rounded-full py-4 px-6 focus:border-cyan-500 outline-none transition-all focus:ring-2 focus:ring-cyan-500/20 appearance-none font-medium shadow-inner">
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -162,11 +162,11 @@ export const SettingsPage = ({ userName, userEmail }) => {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">Height (cm)</label>
+                <label className="text-xs font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">HEIGHT (CM)</label>
                 <input type="number" name="height" value={preferences.height} onChange={handleChange} className="w-full bg-slate-950/80 border border-slate-800 text-white rounded-full py-4 px-6 focus:border-cyan-500 outline-none transition-all focus:ring-2 focus:ring-cyan-500/20 font-medium shadow-inner" />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">Weight (kg)</label>
+                <label className="text-xs font-bold text-slate-200 uppercase ml-5 mb-2.5 block tracking-widest">WEIGHT (KG)</label>
                 <input type="number" name="weight" value={preferences.weight} onChange={handleChange} className="w-full bg-slate-950/80 border border-slate-800 text-white rounded-full py-4 px-6 focus:border-cyan-500 outline-none transition-all focus:ring-2 focus:ring-cyan-500/20 font-medium shadow-inner" />
               </div>
             </div>
@@ -176,10 +176,10 @@ export const SettingsPage = ({ userName, userEmail }) => {
             <button 
               onClick={handleSave}
               disabled={loading}
-              className="w-full md:w-auto px-12 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-full shadow-lg shadow-cyan-900/30 transition-all flex items-center justify-center hover:scale-[1.02] active:scale-95 border-b-4 border-cyan-800 tracking-widest text-sm"
+              className="w-full md:w-auto px-12 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-full shadow-lg shadow-cyan-900/30 transition-all flex items-center justify-center hover:scale-[1.02] active:scale-95 border-b-4 border-cyan-800 tracking-wide text-sm"
             >
               {loading ? <Loader2 className="animate-spin mr-3" /> : <Save className="mr-3" size={20} />} 
-              {loading ? 'SYNCING...' : 'SAVE PREFERENCES'}
+              {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
 
@@ -189,15 +189,15 @@ export const SettingsPage = ({ userName, userEmail }) => {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div>
                   <h4 className="text-base font-bold text-rose-500 mb-1.5 flex items-center"><AlertTriangle size={18} className="mr-3 text-rose-500"/> Danger Zone</h4>
-                  <p className="text-sm text-slate-400 font-medium">Permanently delete your account and wipe all encrypted data from the cloud.</p>
+                  <p className="text-sm text-slate-400 font-medium">Delete your account and all your data permanently. This action cannot be undone.</p>
                 </div>
                 <button 
                   onClick={() => setShowDeleteModal(true)}
                   disabled={deleteLoading}
-                  className="w-full md:w-auto px-6 py-3 bg-rose-950 hover:bg-rose-900 text-rose-400 hover:text-white font-bold rounded-full transition-all flex items-center justify-center border border-rose-900/80 tracking-wider text-xs whitespace-nowrap"
+                  className="w-full md:w-auto px-6 py-3 bg-rose-950 hover:bg-rose-900 text-rose-400 hover:text-white font-bold rounded-full transition-all flex items-center justify-center border border-rose-900/80 tracking-wide text-sm whitespace-nowrap"
                 >
                   {deleteLoading ? <Loader2 className="animate-spin mr-2" size={16}/> : <Trash2 className="mr-2" size={16}/>}
-                  {deleteLoading ? 'ERASING...' : 'DELETE ACCOUNT'}
+                  {deleteLoading ? 'Deleting...' : 'Delete My Account'}
                 </button>
               </div>
             </div>
