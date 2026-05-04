@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ArrowRight, Shield, BrainCircuit, 
+  ArrowRight, Shield, Brain, 
   BarChart3, FileText 
 } from 'lucide-react';
 
@@ -20,14 +20,14 @@ const LandingPage = ({ onGetStarted }) => {
           className="flex flex-col items-center space-y-7 max-w-4xl"
         >
           <h1 className="text-5xl md:text-7xl lg:text-[5rem] font-black text-white leading-[1.1] tracking-tight">
-            Decode Today. <br />
+            Detect Early. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
               Protect Tomorrow.
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-slate-400 font-medium leading-relaxed max-w-2xl mx-auto">
-            TraceMind uses Machine Learning and NLP to analyze your clinical narratives and bio-sync metrics, providing early risk detection and personalized insights with zero-knowledge encryption.
+            TraceMind helps you understand your thoughts and health patterns to detect mental health risks early — giving you simple, personalized insights with complete privacy.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-5 pt-4 w-full sm:w-auto">
@@ -53,7 +53,7 @@ const LandingPage = ({ onGetStarted }) => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
           <div className="bg-slate-900/40 border border-slate-800/80 p-8 rounded-[2rem] hover:bg-slate-800/50 transition-colors group">
             <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <BrainCircuit className="text-blue-400" size={24} />
+              <Brain className="text-blue-400" size={24} />
             </div>
             <h3 className="text-white font-bold text-lg mb-3">AI Risk Assessment</h3>
             <p className="text-slate-200 text-sm leading-relaxed">Advanced NLP and Machine Learning models detect potential mental health risks early.</p>
