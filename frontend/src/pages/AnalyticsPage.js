@@ -38,7 +38,7 @@ export const AnalyticsPage = () => {
     return (
       <div className="flex flex-col justify-center items-center h-[60vh]">
         <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mb-4" />
-        <p className="text-slate-200 font-bold uppercase tracking-[0.2em] text-xs">Loading Health Trends...</p>
+        <p className="text-slate-200 font-bold uppercase tracking-[0.2em] text-xs">Loading Your Health Trends...</p>
       </div>
     );
   }
