@@ -1,5 +1,7 @@
 import os
 import datetime
+import pytz
+IST = pytz.timezone('Asia/Kolkata')
 from typing import Optional
 
 from fastapi import FastAPI, Request
@@ -362,7 +364,7 @@ async def analyze(data: PatientData, request: Request):
         try:
             record = {
                 "user_email": user_email, 
-                "timestamp": datetime.datetime.now(),
+                "timestamp": datetime.datetime.now(IST),
                 "patient_age": data.age,
                 "patient_gender": data.gender,
                 "height": data.height,
@@ -401,7 +403,7 @@ async def update_settings(settings: UserSettingsUpdate, request: Request):
     user_email = verify_token(request)
     if settings_collection is not None:
         update_data = {k: v for k, v in settings.dict().items() if v is not None}
-        update_data["updated_at"] = datetime.datetime.now()
+        update_data["updated_at"] = datetime.datetime.now(IST)
         settings_collection.update_one(
             {"user_email": user_email},
             {"$set": update_data},
