@@ -37,8 +37,8 @@ export const HistoryPage = () => {
 
   const formatDateTime = (timestamp) => {
     const d = new Date(timestamp);
-    const datePart = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const datePart = d.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric' });
+    const timePart = d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
     return `${datePart} • ${timePart}`;
   };
 
@@ -56,11 +56,11 @@ export const HistoryPage = () => {
     doc.setFontSize(10);
     doc.setTextColor(100, 116, 139); 
     doc.text('Neural Assessment History Report', 14, 30);
-    doc.text(`Generated on: ${new Date().toLocaleDateString('en-GB')}`, 14, 35);
+    doc.text(`Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`, 14, 35);
 
     const tableColumn = ["Date", "Risk Level", "AI Sentiment", "PHQ-9", "GAD-7", "BPM", "Sleep"];
     const tableRows = history.map(record => [
-      new Date(record.timestamp).toLocaleDateString('en-GB'),
+      new Date(record.timestamp).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
       record.detected_risk_level || 'N/A',
       record.nlp_analysis?.split('(')[0].trim() || 'Analyzed',
       record.phq9_score?.toString() || '0',
@@ -170,3 +170,4 @@ export const HistoryPage = () => {
     </motion.div>
   );
 };
+                      
