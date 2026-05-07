@@ -1,12 +1,44 @@
-import React from 'react';
-import { Activity, User, Ruler, Scale, ListChecks, Heart, Clock, Loader2, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity, User, Ruler, Scale, ListChecks, Heart, Clock, Loader2, FileText, Calculator, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FormField, CheckboxGroup } from '../components/FormField';
 
 const symptomOptions = ["Social Withdrawal", "Chest Pain", "Headaches", "Panic Attacks", "Loss of Appetite", "Chronic Fatigue"];
 
+const phq9Questions = [
+  "Little interest or pleasure in doing things?",
+  "Feeling down, depressed, or hopeless?",
+  "Trouble falling or staying asleep, or sleeping too much?",
+  "Feeling tired or having little energy?",
+  "Poor appetite or overeating?",
+  "Feeling bad about yourself or that you are a failure?",
+  "Trouble concentrating on things, such as reading or watching TV?",
+  "Moving or speaking so slowly that other people could have noticed? Or the opposite?",
+  "Thoughts that you would be better off dead, or of hurting yourself?"
+];
+
+const gad7Questions = [
+  "Feeling nervous, anxious, or on edge?",
+  "Not being able to stop or control worrying?",
+  "Worrying too much about different things?",
+  "Trouble relaxing?",
+  "Being so restless that it is hard to sit still?",
+  "Becoming easily annoyed or irritable?",
+  "Feeling afraid, as if something awful might happen?"
+];
+
+const scoreOptions = [
+  { label: "Not at all (0)", value: 0 },
+  { label: "Several days (1)", value: 1 },
+  { label: "More than half days (2)", value: 2 },
+  { label: "Nearly every day (3)", value: 3 }
+];
+
 export const InputPage = ({ formData, setFormData, executeAnalysis, loading, profile, dbLastRecord }) => {
-  
+  const [showCalc, setShowCalc] = useState(false);
+  const [calcType, setCalcType] = useState('PHQ9');
+  const [answers, setAnswers] = useState([]);
+
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleSymptomChange = (symptom) => {
     setFormData(prev => ({
@@ -15,6 +47,27 @@ export const InputPage = ({ formData, setFormData, executeAnalysis, loading, pro
         ? prev.symptoms.filter(s => s !== symptom) 
         : [...prev.symptoms, symptom]
     }));
+  };
+
+  const openCalculator = (type) => {
+    setCalcType(type);
+    setAnswers(Array(type === 'PHQ9' ? 9 : 7).fill(0));
+    setShowCalc(true);
+  };
+
+  const handleAnswerChange = (index, value) => {
+    const newAnswers = [...answers];
+    newAnswers[index] = value;
+    setAnswers(newAnswers);
+  };
+
+  const calculateAndSave = () => {
+    const totalScore = answers.reduce((a, b) => a + b, 0);
+    setFormData(prev => ({
+      ...prev,
+      [calcType === 'PHQ9' ? 'phq9_score' : 'gad7_score']: totalScore
+    }));
+    setShowCalc(false);
   };
 
   const handleStartAssessment = () => {
@@ -126,8 +179,26 @@ export const InputPage = ({ formData, setFormData, executeAnalysis, loading, pro
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <FormField label="BPM" name="heart_rate" type="number" value={formData.heart_rate} onChange={handleChange} icon={Heart} />
             <FormField label="Sleep (h)" name="sleep_hours" type="number" value={formData.sleep_hours} onChange={handleChange} icon={Clock} />
-            <FormField label="PHQ-9" name="phq9_score" type="number" value={formData.phq9_score} onChange={handleChange} />
-            <FormField label="GAD-7" name="gad7_score" type="number" value={formData.gad7_score} onChange={handleChange} />
+            
+            <div className="flex flex-col space-y-2">
+              <FormField label="PHQ-9" name="phq9_score" type="number" value={formData.phq9_score} onChange={handleChange} />
+              <button 
+                onClick={() => openCalculator('PHQ9')}
+                className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 flex items-center transition-colors outline-none"
+              >
+                <Calculator size={12} className="mr-1" /> Calculate Score
+              </button>
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <FormField label="GAD-7" name="gad7_score" type="number" value={formData.gad7_score} onChange={handleChange} />
+              <button 
+                onClick={() => openCalculator('GAD7')}
+                className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 flex items-center transition-colors outline-none"
+              >
+                <Calculator size={12} className="mr-1" /> Calculate Score
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -139,6 +210,60 @@ export const InputPage = ({ formData, setFormData, executeAnalysis, loading, pro
       >
         {loading ? <><Loader2 className="animate-spin mr-3" /> TRACING PATTERNS...</> : <>START ASSESSMENT</>}
       </button>
+
+      {/* Calculator Modal */}
+      {showCalc && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-slate-900 pb-4 border-b border-slate-800 z-10">
+              <div>
+                <h3 className="text-2xl font-bold text-white uppercase flex items-center">
+                  <Calculator className="mr-3 text-cyan-500" /> {calcType} Assessment
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest">Select an option for each question</p>
+              </div>
+              <button onClick={() => setShowCalc(false)} className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors outline-none">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {(calcType === 'PHQ9' ? phq9Questions : gad7Questions).map((question, qIndex) => (
+                <div key={qIndex} className="bg-slate-950/50 p-5 rounded-2xl border border-slate-800">
+                  <p className="text-slate-200 font-medium mb-4">{qIndex + 1}. {question}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    {scoreOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => handleAnswerChange(qIndex, opt.value)}
+                        className={`py-3 px-2 text-xs font-semibold rounded-xl border transition-all ${
+                          answers[qIndex] === opt.value 
+                            ? 'bg-cyan-600 border-cyan-400 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]' 
+                            : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center sticky bottom-0 bg-slate-900">
+              <div className="text-slate-300">
+                Current Score: <span className="text-2xl font-bold text-white ml-2">{answers.reduce((a, b) => a + b, 0)}</span>
+              </div>
+              <button 
+                onClick={calculateAndSave} 
+                className="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+              >
+                Apply Score
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
