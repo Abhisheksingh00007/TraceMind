@@ -211,10 +211,9 @@ export const InputPage = ({ formData, setFormData, executeAnalysis, loading, pro
         {loading ? <><Loader2 className="animate-spin mr-3" /> TRACING PATTERNS...</> : <>START ASSESSMENT</>}
       </button>
 
-      {/* Calculator Modal */}
       {showCalc && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-sm z-50 flex justify-center items-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-4 sm:p-8 max-w-3xl w-full h-auto max-h-[88vh] sm:max-h-[85vh] overflow-y-auto shadow-2xl relative my-auto sm:my-0">
             <div className="flex justify-between items-center mb-6 sticky top-0 bg-slate-900 pb-4 border-b border-slate-800 z-10">
               <div>
                 <h3 className="text-2xl font-bold text-white uppercase flex items-center">
@@ -266,4 +265,4 @@ export const InputPage = ({ formData, setFormData, executeAnalysis, loading, pro
       )}
     </div>
   );
-};
+};                
