@@ -36,10 +36,12 @@ export const HistoryPage = () => {
   };
 
   const formatDateTime = (timestamp) => {
-    const d = new Date(timestamp);
+    // FIX: Force JavaScript to treat the backend time as UTC by adding 'Z'
+    const timeStr = (typeof timestamp === 'string' && !timestamp.endsWith('Z')) ? `${timestamp}Z` : timestamp;
+    const d = new Date(timeStr);
     const datePart = d.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric' });
     const timePart = d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
-    return `${datePart} • ${timePart}`;
+    return `${datePart} | ${timePart}`;
   };
 
   const downloadPDF = () => {
@@ -59,15 +61,19 @@ export const HistoryPage = () => {
     doc.text(`Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`, 14, 35);
 
     const tableColumn = ["Date", "Risk Level", "AI Sentiment", "PHQ-9", "GAD-7", "BPM", "Sleep"];
-    const tableRows = history.map(record => [
-      new Date(record.timestamp).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
-      record.detected_risk_level || 'N/A',
-      record.nlp_analysis?.split('(')[0].trim() || 'Analyzed',
-      record.phq9_score?.toString() || '0',
-      record.gad7_score?.toString() || '0',
-      record.heart_rate?.toString() || 'N/A',
-      `${record.sleep_hours || 0}h`
-    ]);
+    const tableRows = history.map(record => {
+      // FIX: Apply the same 'Z' UTC fix for the PDF report dates
+      const timeStr = (typeof record.timestamp === 'string' && !record.timestamp.endsWith('Z')) ? `${record.timestamp}Z` : record.timestamp;
+      return [
+        new Date(timeStr).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
+        record.detected_risk_level || 'N/A',
+        record.nlp_analysis?.split('(')[0].trim() || 'Analyzed',
+        record.phq9_score?.toString() || '0',
+        record.gad7_score?.toString() || '0',
+        record.heart_rate?.toString() || 'N/A',
+        `${record.sleep_hours || 0}h`
+      ];
+    });
 
     autoTable(doc, {
       startY: 45,
@@ -170,4 +176,3 @@ export const HistoryPage = () => {
     </motion.div>
   );
 };
-                      
